@@ -1,0 +1,16 @@
+# Credenciais — nunca versionar. Os .exemplo.json são vazios de propósito
+# e precisam ir junto, para quem clonar saber o que preencher.
+.config-*.json
+!.config-*.exemplo.json
+
+# Diretório de trabalho: resumos do dia, teor de decisão, dados de cliente.
+# Nunca versionar.
+trabalho/
+
+# Histórico de execuções — nomes de cartão com dados de caso
+historico_execucoes.jsonl
+
+# Lixo
+.DS_Store
+__pycache__/
+*.pyc
