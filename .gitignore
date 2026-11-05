@@ -10,6 +10,9 @@ trabalho/
 # Histórico de execuções — nomes de cartão com dados de caso
 historico_execucoes.jsonl
 
+# Saída gerada pelo dashboard — não é código
+dashboard.html
+
 # Lixo
 .DS_Store
 __pycache__/

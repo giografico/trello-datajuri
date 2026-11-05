@@ -25,6 +25,7 @@ mostra a trava de duplicata funcionando: nenhum cartão novo nasce para os
 mesmos lançamentos.
 """
 import os
+import re
 import subprocess
 import sys
 from datetime import date, datetime, timedelta
@@ -124,26 +125,39 @@ def main(dia_str=None, reiniciar=False):
     pulados = resultado.get("fora") or {}
     if pulados:
         print(f"\n  fora de escopo: {pulados}")
-    total_no_quadro = len(duplica_cartao.trello(
-        f"/boards/{duplica_cartao.TESTE}/cards", fields="name"))
+    cartoes_board = duplica_cartao.trello(
+        f"/boards/{duplica_cartao.TESTE}/cards", fields="name,desc,due,shortUrl")
     print(f"\n{len(criados)} cartão(ões) criado(s) nesta execução · "
-          f"{total_no_quadro} no total no quadro de demonstração "
+          f"{len(cartoes_board)} no total no quadro de demonstração "
           f"({cliente_trello_fake.ARQUIVO}).")
 
-    _confere_casos_dificeis(repetidas, duplica_cartao.trello(
-        f"/boards/{duplica_cartao.TESTE}/cards", fields="name,desc,due"))
+    # B e C só fazem sentido sobre os cartões DESTE dia — rodar o demo em
+    # vários dias acumula vários cartões PRZ legítimos no mesmo quadro, e
+    # contar todos juntos quebraria a checagem (achei rodando em 5 dias
+    # seguidos sem --reiniciar). Em dia repetido sem cartão novo, usa os
+    # que já existiam (achados pela trava de duplicata) no lugar.
+    urls_do_dia = {c["url"] for c in criados}
+    for p in ja_existiam:
+        m = re.search(r"https://\S+", p.get("motivo", ""))
+        if m:
+            urls_do_dia.add(m.group(0))
+    cartoes_do_dia = [c for c in cartoes_board if c.get("shortUrl") in urls_do_dia]
+
+    _confere_casos_dificeis(repetidas, cartoes_do_dia, cartoes_board)
 
     print("\nRode `python3 demo.py " + hoje_str + "` de novo: a trava de "
           "duplicata deve impedir cartões repetidos para os mesmos lançamentos.")
 
 
-def _confere_casos_dificeis(repetidas, cartoes):
+def _confere_casos_dificeis(repetidas, cartoes_do_dia, cartoes_board):
     """Não basta rodar — confere, igual ao resto do projeto, que cada caso
-    difícil foi tratado do jeito certo."""
+    difícil foi tratado do jeito certo. B e C olham só os cartões DESTE dia
+    (`cartoes_do_dia`); D e E são invariante do quadro inteiro, mesmo
+    acumulando vários dias (`cartoes_board`)."""
     texto_total = " ".join((c.get("name", "") + " " + c.get("desc", ""))
-                           for c in cartoes)
-    pat = next((c for c in cartoes if c.get("name", "").startswith("PAT")), None)
-    prz = [c for c in cartoes if c.get("name", "").startswith("PRZ")]
+                           for c in cartoes_board)
+    pat = next((c for c in cartoes_do_dia if c.get("name", "").startswith("PAT")), None)
+    prz = [c for c in cartoes_do_dia if c.get("name", "").startswith("PRZ")]
 
     casos = [
         ("A. duplicata entre duas fontes reconhecida", repetidas == 1),

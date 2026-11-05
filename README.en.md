@@ -107,6 +107,11 @@ in free text — and checks, on its own, that each one was handled correctly.
 Cards are saved to `trabalho/demo_trello.json`; running `python3 demo.py`
 again (without `--reiniciar`) shows the duplicate-detection guard at work.
 
+Run demo mode on more than one date, then `python3 dashboard.py` builds a
+local HTML report — cards per day, clean-card rate, most common defect
+types — read from `historico_execucoes.jsonl`, the same file production
+writes to.
+
 ## Running against real data
 
 ```bash
@@ -147,6 +152,7 @@ before any batch creation; if either fails, nothing is created.
 | `modelo.py` | calls the language model (API or a coding agent) |
 | `cliente_plataforma_fake.py`, `cliente_trello_fake.py`, `gerador_dados_ficticios.py` | demo mode |
 | `qa_*.py` | the three QA tools that execute, rather than read code |
+| `dashboard.py` | local HTML report built from the execution history |
 | `docs/` | measured decisions and the summary prompt, explained (Portuguese) |
 | `CLAUDE.md` | governance for the AI agents that built and operate this project |
 

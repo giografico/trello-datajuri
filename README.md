@@ -102,6 +102,11 @@ confere sozinho, ao final, que cada um foi tratado certo. Os cartões ficam
 salvos em `trabalho/demo_trello.json`; rodar `python3 demo.py` de novo (sem
 `--reiniciar`) mostra a trava de duplicata em ação.
 
+Rodando o modo demonstração em mais de um dia, `python3 dashboard.py` monta
+um relatório HTML local com cartões por dia, taxa de cartões sem defeito e
+problemas mais comuns — lido de `historico_execucoes.jsonl`, o mesmo arquivo
+que a produção usa.
+
 ## Para rodar com dados reais
 
 ```bash
@@ -142,6 +147,7 @@ qualquer criação em lote; se um dos dois falhar, nada é criado.
 | `modelo.py` | chama o modelo de linguagem (API ou agente de codificação) |
 | `cliente_plataforma_fake.py`, `cliente_trello_fake.py`, `gerador_dados_ficticios.py` | modo demonstração |
 | `qa_*.py` | as três ferramentas de QA que executam, não leem código |
+| `dashboard.py` | relatório HTML local a partir do histórico de execuções |
 | `docs/` | decisões medidas e o prompt do resumo, explicados |
 | `CLAUDE.md` | governança dos agentes de IA que construíram e operam o projeto |
 

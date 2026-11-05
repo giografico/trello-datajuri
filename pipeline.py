@@ -158,6 +158,7 @@ def _confere(card_id, assunto, prazo_fatal, sem_fatal_na_origem=False):
 
 
 def executar(itens, rotulo=""):
+    _inicio = datetime.now()
     print(f"=== pipeline: {len(itens)} item(ns) {rotulo} ===")
     if not _previoo():
         print("\nABORTADO no pré-voo. Nada foi criado.")
@@ -208,6 +209,7 @@ def executar(itens, rotulo=""):
               + (f"  -> {', '.join(probs)}" if probs else ""))
 
     rel = {"quando": datetime.now().isoformat(timespec="seconds"), "rotulo": rotulo,
+           "duracao_segundos": (datetime.now() - _inicio).total_seconds(),
            "criados": criados, "pulados": pulados, "defeituosos": defeituosos}
     with open(LOG, "a") as f:                       # append-only
         f.write(json.dumps(rel, ensure_ascii=False) + "\n")

@@ -40,11 +40,15 @@ def gera(hoje=None):
     ontem = hoje - timedelta(days=1)
     hoje_str, ontem_str = hoje.strftime("%d/%m/%Y"), ontem.strftime("%d/%m/%Y")
     ano = hoje.year
+    # Varia por dia (não só por ano): rodar o modo demo em datas diferentes
+    # gera processos diferentes, em vez do mesmo punhado de cartões sempre —
+    # é o que dá ao dashboard mais de um dia de histórico para mostrar.
+    off = hoje.toordinal() % 900_000
 
-    cnj_a = _cnj(1111001, ano, 8, 16, 1)      # caso A — duplicata entre fontes
-    cnj_b = _cnj(2222002, ano, 8, 16, 1)      # caso B — ED + recurso
-    cnj_c = _cnj(3333003, ano, 8, 16, 1)      # caso C — sem prazo fatal
-    cnj_e = _cnj(5555005, ano, 8, 16, 1)      # caso E — dado pessoal no texto
+    cnj_a = _cnj(1111001 + off, ano, 8, 16, 1)      # caso A — duplicata entre fontes
+    cnj_b = _cnj(2222002 + off, ano, 8, 16, 1)      # caso B — ED + recurso
+    cnj_c = _cnj(3333003 + off, ano, 8, 16, 1)      # caso C — sem prazo fatal
+    cnj_e = _cnj(5555005 + off, ano, 8, 16, 1)      # caso E — dado pessoal no texto
 
     _TEOR_A = ("Vistos. Trata-se de ação de cobrança movida pela parte "
                "autora. O juízo decide pela procedência do pedido, "
