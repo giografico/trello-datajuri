@@ -158,6 +158,8 @@ def _confere_casos_dificeis(repetidas, cartoes):
     print("\n--- os 5 casos difíceis, conferidos (não só rodados) ---")
     for nome, ok in casos:
         print(f"  {'ok ' if ok else 'FALHOU'} {nome}")
+    if not all(ok for _, ok in casos):
+        sys.exit(1)
 
 
 if __name__ == "__main__":
