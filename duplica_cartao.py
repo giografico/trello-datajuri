@@ -51,14 +51,24 @@ INICIO_PERMANENTE = re.compile(
     re.I | re.M)
 
 
-def trello(path, metodo="GET", **q):
+def trello(path, metodo="GET", json_body=None, **q):
     """POST/PUT mandam os campos no CORPO. Na query string, uma descricao de
-    alguns milhares de caracteres estoura o limite da URI (HTTP 414)."""
+    alguns milhares de caracteres estoura o limite da URI (HTTP 414).
+
+    `json_body`: só o endpoint de campo personalizado precisa de corpo JSON
+    aninhado ({"value": {"date": ...}}) em vez de form-urlencoded — os dois
+    PUTs de customField (aqui e em cartao.py) passam por aqui agora, em vez
+    de montar a chamada HTTP na mão, para ganhar o mesmo retry de rede."""
     cfg = json.load(open(TRELLO_CFG))
     auth = {"key": cfg["key"], "token": cfg["token"]}
     if metodo == "GET":
         url = f"https://api.trello.com/1{path}?" + urllib.parse.urlencode({**q, **auth})
         req = urllib.request.Request(url)
+    elif json_body is not None:
+        url = f"https://api.trello.com/1{path}?" + urllib.parse.urlencode(auth)
+        req = urllib.request.Request(
+            url, data=json.dumps(json_body).encode(), method=metodo,
+            headers={"Content-Type": "application/json"})
     else:
         url = f"https://api.trello.com/1{path}?" + urllib.parse.urlencode(auth)
         req = urllib.request.Request(
@@ -187,14 +197,8 @@ def cria(processo, nome, conteudo, due, prazo_fatal_iso, rodape="", excluir_ids=
     for m in trello(f"/cards/{novo['id']}/members", fields="id"):
         trello(f"/cards/{novo['id']}/idMembers/{m['id']}", "DELETE")
     if prazo_fatal_iso:
-        cfg = json.load(open(TRELLO_CFG))
-        url = (f"https://api.trello.com/1/cards/{novo['id']}/customField/"
-               f"{CF_PRAZO_FATAL}/item?key={cfg['key']}&token={cfg['token']}")
-        req = urllib.request.Request(
-            url, data=json.dumps({"value": {"date": prazo_fatal_iso}}).encode(),
-            method="PUT", headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=60, context=CTX) as r:
-            r.read()
+        trello(f"/cards/{novo['id']}/customField/{CF_PRAZO_FATAL}/item", "PUT",
+               json_body={"value": {"date": prazo_fatal_iso}})
     return novo, fonte
 
 

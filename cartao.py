@@ -25,7 +25,7 @@ Regras aplicadas (medidas):
      o prefixo e' removido do nome do cartao
  11. CPF, RG, CTPS e dados bancarios sao removidos de titulo, conteudo e rodape
 """
-import json, re, urllib.request
+import re
 from datetime import datetime
 
 import duplica_cartao as dc
@@ -278,15 +278,9 @@ def criar(assunto, conteudo, rodape, n_lancamentos=1, prazo_fatal=None,
         novo = dc.trello("/cards", "POST", **p)
 
     if prazo_fatal and preenche_prazo_fatal(nome):              # regra 3
-        cfg = json.load(open(dc.TRELLO_CFG))
         f = datetime.strptime(prazo_fatal, "%d/%m/%Y").date()
-        req = urllib.request.Request(
-            f"https://api.trello.com/1/cards/{novo['id']}/customField/"
-            f"{dc.CF_PRAZO_FATAL}/item?key={cfg['key']}&token={cfg['token']}",
-            data=json.dumps({"value": {"date": f"{f.isoformat()}T{HORA_UTC}"}}).encode(),
-            method="PUT", headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=60, context=dc.CTX) as r:
-            r.read()
+        dc.trello(f"/cards/{novo['id']}/customField/{dc.CF_PRAZO_FATAL}/item", "PUT",
+                  json_body={"value": {"date": f"{f.isoformat()}T{HORA_UTC}"}})
 
     # AUTORIA VAI PARA O COMENTARIO, nao para a descricao (pedido da
     # Controladoria em 29/10/2026). A descricao e' para o teor da decisao e
